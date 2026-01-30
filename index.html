@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>EAGLEX PREMIUM</title>
+    <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <style>
+        /* --- HEADER & IFRAME STYLING --- */
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&display=swap');
+
+        body, html {
+            margin: 0; padding: 0;
+            height: 100%; background-color: #000;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+
+        .mod-header {
+            background: #050505;
+            padding: 4px 0; 
+            text-align: center;
+            border-bottom: 1px solid #00ffcc;
+            position: relative;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .mod-header::before {
+            content: "";
+            position: absolute;
+            left: 8px; top: 6px;
+            width: 15px; height: 15px;
+            border-left: 2px solid #00ffcc;
+            border-top: 2px solid #00ffcc;
+            filter: drop-shadow(0 0 3px #00ffcc);
+        }
+
+        .mod-header::after {
+            content: "";
+            position: absolute;
+            right: 8px; top: 6px;
+            width: 15px; height: 15px;
+            border-right: 2px solid #00ffcc;
+            border-top: 2px solid #00ffcc;
+            filter: drop-shadow(0 0 3px #00ffcc);
+        }
+
+        .side-info-left {
+            position: absolute;
+            left: 30px; top: 8px;
+            color: #00ffcc;
+            font-size: 7px;
+            font-family: monospace;
+            text-align: left;
+            line-height: 1.1;
+            opacity: 0.8;
+        }
+
+        .side-info-right {
+            position: absolute;
+            right: 30px; top: 8px;
+            color: #00ffcc;
+            font-size: 7px;
+            font-family: monospace;
+            text-align: right;
+            line-height: 1.1;
+            opacity: 0.8;
+        }
+
+        .header-name {
+            font-family: 'El Messiri', sans-serif;
+            font-weight: 900;
+            font-size: 15px;
+            margin: 0;
+            color: #00ffcc;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 0px #000, 0 0 8px rgba(0, 255, 204, 0.8);
+        }
+
+        .injector-btn-main {
+            margin-top: 4px;
+            background: #000;
+            color: #00ffcc;
+            border: 1px solid #00ffcc;
+            padding: 3px 20px;
+            font-size: 9px;
+            font-weight: bold;
+            border-radius: 2px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 0 8px rgba(0, 255, 204, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .injector-btn-main:hover {
+            background: #00ffcc;
+            color: #000;
+            box-shadow: 0 0 15px #00ffcc;
+        }
+
+        .web-view {
+            width: 100%;
+            height: calc(100vh - 65px); 
+            border: none;
+        }
+
+        /* --- INJECTOR MENU STYLING --- */
+        :root {
+            --glow: #00ffcc;
+            --accent: #ff0033;
+            --panel: rgba(5, 5, 10, 0.95);
+        }
+
+        #menu {
+            width: 220px; 
+            background: var(--panel);
+            border: 1.5px solid var(--glow);
+            border-radius: 4px;
+            position: absolute;
+            top: 100px; left: 50px;
+            box-shadow: 0 0 25px rgba(0, 255, 204, 0.3), inset 0 0 15px rgba(0, 255, 204, 0.1);
+            touch-action: none;
+            z-index: 10000;
+            overflow: hidden;
+            animation: boot 0.5s ease-out;
+            display: none; 
+        }
+
+        @keyframes boot { from { opacity:0; transform: scale(0.8); } to { opacity:1; transform: scale(1); } }
+
+        .header-bar {
+            background: linear-gradient(90deg, #004444, #000);
+            padding: 8px; 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1.5px solid var(--glow);
+        }
+
+        .logo-box { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            font-weight: 900; 
+            color: #fff; 
+            font-size: 13px;
+            letter-spacing: 1px; 
+        }
+
+        .close-btn {
+            cursor: pointer; 
+            color: var(--accent); 
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        #menu::after {
+            content: " ";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 255, 204, 0.05) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 3px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .content { padding: 12px; position: relative; } 
+
+        #auth-section { text-align: center; display: block; }
+
+        .uid-input {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glow);
+            color: #fff;
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            font-size: 10px;
+            outline: none;
+        }
+
+        #hack-section { display: none; }
+
+        .data-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(0, 255, 204, 0.2);
+            padding: 7px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .label { font-size: 7px; color: var(--glow); text-transform: uppercase; margin-bottom: 4px; opacity: 0.8; }
+        .val { color: #fff; font-size: 12px; font-family: monospace; letter-spacing: 1px; }
+
+        .predict-zone {
+            height: 60px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 0, 51, 0.3);
+            margin-bottom: 12px;
+            background: radial-gradient(circle, rgba(255,0,51,0.1) 0%, transparent 70%);
+        }
+
+        #result { font-size: 28px; font-weight: 900; color: #fff; text-shadow: 0 0 15px var(--accent); font-family: 'Orbitron', sans-serif; }
+        .percent { font-size: 9px; color: var(--accent); margin-top: 4px; font-weight: bold; font-family: 'Orbitron', sans-serif; }
+
+        .inject-btn {
+            width: 100%;
+            background: var(--glow);
+            border: none;
+            padding: 10px;
+            color: #000;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            cursor: pointer;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
+            transition: 0.2s;
+            font-size: 12px;
+        }
+
+        .inject-btn:active { transform: scale(0.95); filter: hue-rotate(90deg); }
+
+        .loader-bar {
+            width: 100%; height: 2px; background: #222;
+            margin-top: 10px; display: none; overflow: hidden;
+        }
+        .loader-fill { 
+            width: 0%; height: 100%; background: var(--glow); 
+            box-shadow: 0 0 10px var(--glow);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mod-header">
+        <div class="side-info-left">VER: 2026.1<br>STATUS: ON</div>
+        <div class="side-info-right">USER: ADMIN<br>PING: 24MS</div>
+        <h1 class="header-name">EAGLEX</h1>
+        <button class="injector-btn-main" onclick="toggleMenu()">OPEN INJECTOR</button>
+    </div>
+
+    <iframe 
+        src="https://www.tsgame2026.pro/#/register?invitationCode=348663112478" 
+        class="web-view">
+    </iframe>
+
+    <div id="menu">
+        <div class="header-bar">
+            <div class="logo-box">
+                <span style="font-size: 14px; color: gold;">👑</span> EAGLE X HACK
+            </div>
+            <div class="close-btn" onclick="document.getElementById('menu').style.display='none'">[X]</div>
+        </div>
+
+        <div class="content">
+            <div id="auth-section">
+                <div class="label" style="margin-bottom:10px;">ENTER AUTHORIZED UID</div>
+                <input type="text" id="uid-input" class="uid-input" placeholder="Enter UID Here...">
+                <button class="inject-btn" onclick="checkUID()">CHECK UID</button>
+            </div>
+
+            <div id="hack-section">
+                <div class="data-card">
+                    <div class="label">HACKED ID</div>
+                    <div class="val" id="period-ui">XXXX XXXXXXXXXX XXX</div>
+                </div>
+
+                <div class="predict-zone">
+                    <div id="result">EAGLEX</div>
+                    <div class="percent" id="perc-ui">CONFIDENCE: 0%</div>
+                </div>
+
+                <button class="inject-btn" onclick="startHack()">SURESHOT</button>
+                <div class="loader-bar" id="load-box"><div class="loader-fill" id="fill"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAOuWvLj7NlW7KaNkvBqFFyB8x7Fvagk7s",
+            authDomain: "god-predictor-48faf.firebaseapp.com",
+            databaseURL: "https://god-predictor-48faf-default-rtdb.firebaseio.com",
+            projectId: "god-predictor-48faf",
+            storageBucket: "god-predictor-48faf.firebasestorage.app",
+            messagingSenderId: "70402631823",
+            appId: "1:70402631823:web:ef7b8ef4969e808b7b28fa"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        function toggleMenu() {
+            document.getElementById('menu').style.display = 'block';
+            autoLogin();
+        }
+
+        async function checkUID() {
+            const input = document.getElementById('uid-input').value.trim();
+            if(!input) return alert("Please enter a UID");
+
+            db.ref('keys').once('value').then(snapshot => {
+                let authorized = false;
+                if(snapshot.exists()){
+                    Object.values(snapshot.val()).forEach(keyObj => {
+                        if(keyObj.name === input) authorized = true;
+                    });
+                }
+
+                if(authorized){
+                    localStorage.setItem('eaglex_uid', input);
+                    showHackSection();
+                } else {
+                    alert("INVALID UID OR ACCESS EXPIRED");
+                }
+            });
+        }
+
+        async function autoLogin() {
+            const savedUID = localStorage.getItem('eaglex_uid');
+            if(savedUID) {
+                db.ref('keys').once('value').then(snapshot => {
+                    let stillValid = false;
+                    if(snapshot.exists()){
+                        Object.values(snapshot.val()).forEach(keyObj => {
+                            if(keyObj.name === savedUID) stillValid = true;
+                        });
+                    }
+                    if(stillValid) {
+                        showHackSection();
+                    } else {
+                        localStorage.removeItem('eaglex_uid');
+                        showAuthSection();
+                    }
+                });
+            }
+        }
+
+        function showHackSection() {
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('hack-section').style.display = 'block';
+        }
+
+        function showAuthSection() {
+            document.getElementById('auth-section').style.display = 'block';
+            document.getElementById('hack-section').style.display = 'none';
+        }
+
+        const menu = document.getElementById("menu");
+        let isDragging = false, offset = [0,0];
+        menu.addEventListener('mousedown', dragStart);
+        menu.addEventListener('touchstart', dragStart, {passive: false});
+        function dragStart(e) {
+            isDragging = true;
+            const x = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
+            const y = e.type === "touchstart" ? e.touches[0].clientY : e.clientY;
+            offset = [menu.offsetLeft - x, menu.offsetTop - y];
+        }
+        document.addEventListener('mousemove', dragMove);
+        document.addEventListener('touchmove', dragMove, {passive: false});
+        function dragMove(e) {
+            if (!isDragging) return;
+            const x = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
+            const y = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
+            menu.style.left = (x + offset[0]) + 'px';
+            menu.style.top = (y + offset[1]) + 'px';
+        }
+        document.addEventListener('mouseup', () => isDragging = false);
+        document.addEventListener('touchend', () => isDragging = false);
+
+        const API = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json";
+
+        // ===== TIME-SYNCHRONIZED SESSION CONTROLLER =====
+        function isSessionActive() {
+            const now = new Date();
+            const h = now.getHours();
+            const m = now.getMinutes();
+            const totalMinutes = h * 60 + m;
+            const sessions = [
+                { start: 9*60, end: 9*60+8 },
+                { start: 12*60, end: 12*60+8 },
+                { start: 16*60, end: 16*60+8 },
+                { start: 21*60, end: 21*60+8 }
+            ];
+            for (let s of sessions) {
+                if (totalMinutes >= s.start && totalMinutes <= s.end) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function getNextSessionTime() {
+            const now = new Date();
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            const sessionStarts = [9*60, 12*60, 16*60, 21*60];
+            let nextStart = null;
+            for (let s of sessionStarts) {
+                if (s > currentMinutes) {
+                    if (!nextStart || s < nextStart) nextStart = s;
+                }
+            }
+            if (nextStart === null) {
+                nextStart = 9*60 + 24*60;
+            }
+            const hours = Math.floor(nextStart / 60) % 24;
+            const minutes = nextStart % 60;
+            const hh = String(hours).padStart(2, '0');
+            const mm = String(minutes).padStart(2, '0');
+            return `${hh}:${mm}`;
+        }
+
+        function getSessionId() {
+            const now = new Date();
+            const h = now.getHours();
+            if (h >= 9 && h < 10) return "09";
+            if (h >= 12 && h < 13) return "12";
+            if (h >= 16 && h < 17) return "16";
+            if (h >= 21 && h < 22) return "21";
+            return "none";
+        }
+
+        // ===== PATTERN RECOGNITION LIBRARY =====
+        const patternLibrary = {
+            basic: [
+                "BSBSBS", "SBSBSB", "BBSSBBSS", "SSBBSSBB", "BSSBBSSB", "SBBSSBB"
+            ],
+            block: [
+                "BBBSSS", "SSBBB", "BBSSSB", "SSBBBS", "BBBBSS", "SSBB"
+            ],
+            mirror: [
+                "BSSB", "SBBS", "BSB", "SBS", "BBSBB", "SSBSS"
+            ],
+            wave: [
+                "BSBBSBBS", "SBSBSBBS", "BSSBSB", "SBBSSBS"
+            ],
+            progression: [
+                "BSSS", "BBSSS", "BBBSSS", "SBBB", "SSBBB", "SSSBBB"
+            ],
+            structured: [
+                "BSBSSB", "SBSBBS", "BBSBSS", "SSBSBB", "BSSBBS", "SBBSSB"
+            ],
+            longChain: [
+                "BSBSBSBSB", "SBSBSBSBS", "BBSSBSB SB", "SSB BSSB SB"
+            ],
+            trendShift: [
+                "BBBSBBBS", "SSBSBSBB", "BBSBBSBBS", "SSBSSBSB"
+            ],
+            pureLogic: [
+                "BSBSBS", "BB S", "B SS", "BBB S", "S BBB"
+            ],
+            compressed: [
+                "BBSS", "BBBS", "SSB", "BSSS"
+            ],
+            chaos: [
+                "BSBBS SB", "SBSBSB", "BBSSSB", "SSBBBS"
+            ],
+            extreme: [
+                "BSSBSBB S", "SBBSSB S", "BSBSBB", "SBSBBS"
+            ],
+            alternation: [
+                "BSBSBB S", "SBSBSSB", "BB S BS", "SS B SS"
+            ],
+            pureRandom: [
+                "BSSS B", "SSBB B", "BBSS B", "SSBB S"
+            ]
+        };
+
+        function flattenPatterns() {
+            let all = [];
+            for (let category in patternLibrary) {
+                patternLibrary[category].forEach(p => {
+                    all.push(p.replace(/\s/g, ""));
+                });
+            }
+            return all;
+        }
+
+        function analyzePatterns(historyStr) {
+            const allPatterns = flattenPatterns();
+            let bestMatch = null;
+            let bestConfidence = 0;
+            // Also consider entropy to decide SKIP
+            const unique = new Set(historyStr.split(""));
+            const entropy = unique.size / historyStr.length;
+            if (entropy > 0.5 && historyStr.length >= 10) {
+                // high randomness, skip
+                return { match: null, confidence: 0, skip: true };
+            }
+            for (let pattern of allPatterns) {
+                if (historyStr.length < pattern.length) continue;
+                let count = 0;
+                for (let i = 0; i <= historyStr.length - pattern.length; i++) {
+                    if (historyStr.substring(i, i + pattern.length) === pattern) {
+                        count++;
+                    }
+                }
+                if (count > 0) {
+                    const confidence = Math.min(95, Math.round((count * pattern.length) / historyStr.length * 100));
+                    if (confidence > bestConfidence) {
+                        bestConfidence = confidence;
+                        bestMatch = pattern;
+                    }
+                }
+            }
+            return { match: bestMatch, confidence: bestConfidence, skip: false };
+        }
+
+        function predictNext(patternStr) {
+            if (!patternStr) return null;
+            // Use pure logic: if pattern ends with B, next is S, else B
+            const lastChar = patternStr[patternStr.length - 1];
+            return lastChar === 'B' ? 'S' : 'B';
+        }
+
+        // ===== 5/8 ANALYSIS EXECUTION =====
+        async function startHack() {
+            if (!isSessionActive()) {
+                const nextTime = getNextSessionTime();
+                document.getElementById('result').innerText = 'WAIT';
+                document.getElementById('perc-ui').innerText = `NEXT SESSION - ${nextTime}`;
+                return;
+            }
+
+            const sessionId = getSessionId();
+            let sessionData = JSON.parse(localStorage.getItem('eaglex_sessionData') || '{}');
+            if (!sessionData[sessionId]) {
+                sessionData[sessionId] = { bets: 0, predictions: 0 };
+            }
+            let state = sessionData[sessionId];
+            state.bets++;
+            if (state.bets > 8) {
+                document.getElementById('result').innerText = 'SESSION ENDED';
+                document.getElementById('perc-ui').innerText = 'WAIT';
+                return;
+            }
+            localStorage.setItem('eaglex_sessionData', JSON.stringify(sessionData));
+
+            const resText = document.getElementById('result');
+            const loadBox = document.getElementById('load-box');
+            const fill = document.getElementById('fill');
+            const perc = document.getElementById('perc-ui');
+            const periodUI = document.getElementById("period-ui");
+
+            loadBox.style.display = 'block';
+            resText.innerText = "ANALYZING...";
+            resText.style.fontSize = "18px";
+            
+            let p = 0;
+            let itv = setInterval(() => {
+                p += 5;
+                fill.style.width = p + "%";
+                if(p >= 100) clearInterval(itv);
+            }, 30);
+
+            try {
+                const response = await fetch(API);
+                const json = await response.json();
+                const history = (json?.data?.list || [])
+                    .slice(0, 30)
+                    .map(item => item.result || 'B')
+                    .filter(r => r === 'B' || r === 'S');
+                
+                const historyStr = history.reverse().join(''); 
+
+                setTimeout(() => {
+                    if (state.predictions < 5) {
+                        const analysis = analyzePatterns(historyStr);
+                        // 5/8 Analysis: SKIP if unstable, else PREDICT
+                        if (analysis.skip || analysis.confidence < 85 || !analysis.match) {
+                            resText.innerText = 'UNSTABLE TREND: SKIPPING...';
+                            perc.innerText = '';
+                        } else {
+                            const nextPred = predictNext(analysis.match);
+                            if (nextPred) {
+                                state.predictions++;
+                                localStorage.setItem('eaglex_sessionData', JSON.stringify(sessionData));
+                                resText.innerText = nextPred;
+                                resText.style.fontSize = "28px";
+                                resText.style.color = "#ff0033";
+                                perc.innerText = `CONFIDENCE: ${analysis.confidence}%`;
+                            } else {
+                                resText.innerText = 'UNSTABLE TREND: SKIPPING...';
+                                perc.innerText = '';
+                            }
+                        }
+                    } else {
+                        resText.innerText = 'UNSTABLE TREND: SKIPPING...';
+                        perc.innerText = '';
+                    }
+                    loadBox.style.display = 'none';
+                    fill.style.width = "0%";
+                    clearInterval(itv);
+                }, 1000);
+            } catch (e) {
+                setTimeout(() => {
+                    resText.innerText = "API ERROR";
+                    loadBox.style.display = 'none';
+                    fill.style.width = "0%";
+                    clearInterval(itv);
+                }, 1000);
+            }
+        }
+    </script>
+</body>
+</html>
